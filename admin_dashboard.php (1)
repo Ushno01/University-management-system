@@ -1,0 +1,172 @@
+<?php
+session_start();
+include 'db.php';
+
+if (!isset($_SESSION['admin'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+$msg = "";
+
+// Add Student
+if (isset($_POST['add_student'])) {
+    $sid    = trim($_POST['student_id']);
+    $name   = trim($_POST['name']);
+    $email  = trim($_POST['email']);
+    $course = trim($_POST['course']);
+    $result = trim($_POST['result']);
+    $pass   = MD5(trim($_POST['password']));
+
+    $check = mysqli_query($conn, "SELECT id FROM students WHERE student_id='$sid'");
+    if (mysqli_num_rows($check) > 0) {
+        $msg = "<p class='error'>Student ID already exists!</p>";
+    } else {
+        mysqli_query($conn, "INSERT INTO students (student_id, name, email, password, course, result)
+                             VALUES ('$sid','$name','$email','$pass','$course','$result')");
+        $msg = "<p class='success'>Student added successfully!</p>";
+    }
+}
+
+// Update Student
+if (isset($_POST['update_student'])) {
+    $id     = $_POST['id'];
+    $sid    = trim($_POST['student_id']);
+    $name   = trim($_POST['name']);
+    $email  = trim($_POST['email']);
+    $course = trim($_POST['course']);
+    $result = trim($_POST['result']);
+
+    mysqli_query($conn, "UPDATE students SET student_id='$sid', name='$name', email='$email',
+                         course='$course', result='$result' WHERE id='$id'");
+    $msg = "<p class='success'>Student updated successfully!</p>";
+}
+
+// Delete Student
+if (isset($_GET['delete'])) {
+    $del_id = intval($_GET['delete']);
+    mysqli_query($conn, "DELETE FROM students WHERE id='$del_id'");
+    $msg = "<p class='success'>Student deleted.</p>";
+}
+
+// Fetch edit student
+$edit_student = null;
+if (isset($_GET['edit'])) {
+    $eid = intval($_GET['edit']);
+    $er  = mysqli_query($conn, "SELECT * FROM students WHERE id='$eid'");
+    $edit_student = mysqli_fetch_assoc($er);
+}
+
+// All students
+$all = mysqli_query($conn, "SELECT * FROM students ORDER BY id DESC");
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="navbar">
+    <strong>🎓 University Student Portal — Admin</strong>
+    <div>
+        Welcome, <?php echo $_SESSION['admin']; ?> &nbsp;|&nbsp;
+        <a href="logout.php">Logout</a>
+    </div>
+</div>
+
+<div class="dashboard">
+    <h2>Admin Dashboard</h2>
+    <?php echo $msg; ?>
+
+    <!-- Add / Edit Form -->
+    <div class="card">
+        <h3><?php echo $edit_student ? '✏️ Edit Student' : '➕ Add New Student'; ?></h3>
+        <form method="POST">
+            <?php if ($edit_student): ?>
+                <input type="hidden" name="id" value="<?php echo $edit_student['id']; ?>">
+            <?php endif; ?>
+
+            <div class="form-row">
+                <div>
+                    <label>Student ID</label>
+                    <input type="text" name="student_id" placeholder="e.g. STU2024001"
+                           value="<?php echo $edit_student['student_id'] ?? ''; ?>" required>
+                </div>
+                <div>
+                    <label>Full Name</label>
+                    <input type="text" name="name" placeholder="Student name"
+                           value="<?php echo $edit_student['name'] ?? ''; ?>" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label>Gmail Address</label>
+                    <input type="email" name="email" placeholder="student@gmail.com"
+                           value="<?php echo $edit_student['email'] ?? ''; ?>">
+                </div>
+                <div>
+                    <label>Course</label>
+                    <input type="text" name="course" placeholder="e.g. BSc Computer Science"
+                           value="<?php echo $edit_student['course'] ?? ''; ?>">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                    <label>Result / Grade</label>
+                    <input type="text" name="result" placeholder="e.g. A+, Pass, 3.8 GPA"
+                           value="<?php echo $edit_student['result'] ?? ''; ?>">
+                </div>
+                <?php if (!$edit_student): ?>
+                <div>
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Set a password" required>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            <?php if ($edit_student): ?>
+                <button type="submit" name="update_student">Update Student</button>
+                <a href="admin_dashboard.php" class="btn" style="background:#888;margin-top:8px;">Cancel</a>
+            <?php else: ?>
+                <button type="submit" name="add_student">Add Student</button>
+            <?php endif; ?>
+        </form>
+    </div>
+
+    <!-- Students Table -->
+    <div class="card">
+        <h3>📋 All Students</h3>
+        <table>
+            <tr>
+                <th>Student ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Course</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+            <?php while ($row = mysqli_fetch_assoc($all)): ?>
+            <tr>
+                <td><?php echo $row['student_id']; ?></td>
+                <td><?php echo $row['name']; ?></td>
+                <td><?php echo $row['email']; ?></td>
+                <td><?php echo $row['course'] ?: '—'; ?></td>
+                <td><?php echo $row['result'] ?: '—'; ?></td>
+                <td>
+                    <a href="?edit=<?php echo $row['id']; ?>" class="btn-small btn-edit">Edit</a>
+                    <a href="?delete=<?php echo $row['id']; ?>"
+                       class="btn-small btn-delete"
+                       onclick="return confirm('Delete this student?')">Delete</a>
+                </td>
+            </tr>
+            <?php endwhile; ?>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!-- file name: index.php -->
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>University Student Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            color: #003580;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar strong {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar strong i {
+            font-size: 28px;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #003580;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            background: transparent;
+            border: 2px solid transparent;
+        }
+
+        .nav-links a:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .hero-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-icon {
+            font-size: 80px;
+            color: white;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-size: 48px;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 50px;
+            line-height: 1.6;
+        }
+
+        .portal-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .portal-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            transition: height 0.3s ease;
+        }
+
+        .portal-card:hover::before {
+            height: 100%;
+            opacity: 0.05;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .portal-card i {
+            font-size: 48px;
+            transition: transform 0.3s ease;
+        }
+
+        .portal-card:hover i {
+            transform: scale(1.1);
+        }
+
+        .portal-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .portal-card p {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+
+        .student-card { border-top: 4px solid #667eea; }
+        .student-card i { color: #667eea; }
+        .student-card::before { background: #667eea; }
+
+        .teacher-card { border-top: 4px solid #28a745; }
+        .teacher-card i { color: #28a745; }
+        .teacher-card::before { background: #28a745; }
+
+        .admin-card { border-top: 4px solid #ff6b6b; }
+        .admin-card i { color: #ff6b6b; }
+        .admin-card::before { background: #ff6b6b; }
+
+        .register-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 15px 40px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .register-link:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .register-link i {
+            margin-right: 8px;
+        }
+
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .feature-item {
+            text-align: center;
+            color: white;
+        }
+
+        .feature-item i {
+            font-size: 36px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .feature-item h4 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .feature-item p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .portal-cards {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .features-section {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <strong>
+        <i class="fas fa-graduation-cap"></i>
+        University Student Portal
+    </strong>
+    <div class="nav-links">
+        <a href="student_login.php"><i class="fas fa-user-graduate"></i> Student</a>
+        <a href="teacher_login.php"><i class="fas fa-chalkboard-teacher"></i> Teacher</a>
+        <a href="admin_login.php"><i class="fas fa-user-shield"></i> Admin</a>
+        <a href="register.php"><i class="fas fa-user-plus"></i> Register</a>
+    </div>
+</div>
+
+<div class="hero-section">
+    <div class="hero-content">
+        <i class="fas fa-university hero-icon"></i>
+        
+        <h1>Welcome to the Student Portal</h1>
+        
+        <p class="subtitle">
+            Your gateway to academic excellence. Access courses, check results, 
+            and stay connected with your academic journey.
+        </p>
+
+        <div class="portal-cards">
+            <a href="student_login.php" class="portal-card student-card">
+                <i class="fas fa-user-graduate"></i>
+                <div>
+                    <h3>Student Login</h3>
+                    <p>Access your courses, results, and profile</p>
+                </div>
+            </a>
+
+            <a href="teacher_login.php" class="portal-card teacher-card">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <div>
+                    <h3>Teacher Login</h3>
+                    <p>Update grades and manage student results</p>
+                </div>
+            </a>
+
+            <a href="admin_login.php" class="portal-card admin-card">
+                <i class="fas fa-user-shield"></i>
+                <div>
+                    <h3>Admin Login</h3>
+                    <p>Manage students and system settings</p>
+                </div>
+            </a>
+        </div>
+
+        <a href="register.php" class="register-link">
+            <i class="fas fa-user-plus"></i> New Student? Register Here
+        </a>
+
+        <div class="features-section">
+            <div class="feature-item">
+                <i class="fas fa-book-open"></i>
+                <h4>Course Management</h4>
+                <p>Access your enrolled courses</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-chart-bar"></i>
+                <h4>Result Tracking</h4>
+                <p>View your grades and results</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <h4>Secure Access</h4>
+                <p>Protected student information</p>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-headset"></i>
+                <h4>Support</h4>
+                <p>Get help when you need it</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
